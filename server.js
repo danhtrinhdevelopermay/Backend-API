@@ -77,7 +77,7 @@ app.get('/api/config/clipdrop-keys', (req, res) => {
 app.post('/api/config/clipdrop-keys', (req, res) => {
   try {
     const { primary, backup, status } = req.body;
-    
+
     if (!primary || !backup) {
       return res.status(400).json({ error: 'Both primary and backup API keys are required' });
     }
@@ -121,3 +121,15 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📋 API Endpoint: http://localhost:${PORT}/api/config/clipdrop-keys`);
   console.log(`🌐 Web Interface: http://localhost:${PORT}`);
 });
+
+// Prevent Render spin-down (ping every 10 minutes)
+const fetch = require('node-fetch');
+
+setInterval(() => {
+  fetch(`http://localhost:${PORT}/health`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Unexpected response ${res.status}`);
+      console.log('🔄 Keep-alive ping successful');
+    })
+    .catch(err => console.error('⚠️ Keep-alive ping failed:', err));
+}, 600000);
